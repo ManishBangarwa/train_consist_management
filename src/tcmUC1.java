@@ -1,83 +1,28 @@
 import java.util.ArrayList;
+import java.util.List;
 
-// Coach class representing each coach in the train
-class Coach {
-    private String coachId;
-    private String coachType;
-
-    public Coach(String coachId, String coachType) {
-        this.coachId = coachId;
-        this.coachType = coachType;
-    }
-
-    public String getCoachId() {
-        return coachId;
-    }
-
-    public String getCoachType() {
-        return coachType;
-    }
-
-    @Override
-    public String toString() {
-        return coachId + " (" + coachType + ")";
-    }
-}
-
-// Train class managing list of coaches
-class Train {
-    private String trainName;
-    private ArrayList<Coach> coaches;
-
-    public Train(String trainName) {
-        this.trainName = trainName;
-        this.coaches = new ArrayList<>();
-    }
-
-    // Add coach to train
-    public void addCoach(Coach coach) {
-        // Prevent duplicate coach IDs
-        for (Coach c : coaches) {
-            if (c.getCoachId().equals(coach.getCoachId())) {
-                System.out.println("Duplicate Coach ID not allowed: " + coach.getCoachId());
-                return;
-            }
-        }
-        coaches.add(coach);
-        System.out.println("Coach added: " + coach);
-    }
-
-    // Display train consist
-    public void displayConsist() {
-        System.out.println("\nTrain: " + trainName);
-        if (coaches.isEmpty()) {
-            System.out.println("No coaches attached.");
-            return;
-        }
-
-        System.out.println("Train Consist:");
-        for (int i = 0; i < coaches.size(); i++) {
-            System.out.println((i + 1) + ". " + coaches.get(i));
-        }
-    }
-}
-
-// Main class for UC1
 public class tcmUC1 {
+
     public static void main(String[] args) {
 
-        // Create Train
-        Train train = new Train("Express-101");
+        // Display welcome banner
+        System.out.println("==============================================");
+        System.out.println(" === Train Consist Management App === ");
+        System.out.println("==============================================\n");
 
-        // Add Coaches
-        train.addCoach(new Coach("C1", "Sleeper"));
-        train.addCoach(new Coach("C2", "AC"));
-        train.addCoach(new Coach("C3", "General"));
+        // Create a dynamic list to store train bogies (using String to represent bogie IDs/Types)
+        List<String> trainConsist = new ArrayList<>();
 
-        // Attempt duplicate
-        train.addCoach(new Coach("C2", "AC"));
+        // Display initial consist information
+        System.out.println("Train initialized successfully...");
 
-        // Display Train Consist
-        train.displayConsist();
+        // Display the count of bogies (should be 0 initially)
+        System.out.println("Initial Bogie Count : " + trainConsist.size());
+
+        // Print the current state of the train (empty list [])
+        System.out.println("Current Train Consist : " + trainConsist);
+
+        // Final status message
+        System.out.println("\nSystem ready for operations...");
     }
 }
