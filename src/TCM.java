@@ -1,62 +1,47 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.regex.Pattern;
+
 public class TCM {
-
-    // Inner class to represent a Goods Bogie
-    static class GoodsBogie {
-        String type;
-        String cargo;
-
-        GoodsBogie(String type, String cargo) {
-            this.type = type;
-            this.cargo = cargo;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("[%s | Cargo: %s]", type, cargo);
-        }
-    }
 
     public static void main(String[] args) {
 
         // Display banner
         System.out.println("==============================================");
-        System.out.println(" UC12 - Stream Safety Validation (allMatch) ");
+        System.out.println(" UC11 - Regex Validation (ID & Cargo) ");
         System.out.println("==============================================\n");
 
-        // 1. Valid Train Formation
-        List<GoodsBogie> validTrain = new ArrayList<>();
-        validTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
-        validTrain.add(new GoodsBogie("Open", "Coal"));
-        validTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
+        // Define Regex Patterns
+        // ^ and $ ensure we match the entire string from start to end
+        String trainIdRegex = "^TRN-\\d{4}$";
+        String cargoCodeRegex = "^PET-[A-Z]{2}$";
 
-        // 2. Invalid Train Formation (Violation: Cylindrical carrying Coal)
-        List<GoodsBogie> invalidTrain = new ArrayList<>();
-        invalidTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
-        invalidTrain.add(new GoodsBogie("Cylindrical", "Coal")); // Violation
-        invalidTrain.add(new GoodsBogie("Box", "Grain"));
+        // --- Test Cases for Train ID ---
+        System.out.println("--- Train ID Validation ---");
+        validateInput("TRN-1234", trainIdRegex, "Valid Train ID");
+        validateInput("TRN-123", trainIdRegex, "Invalid Digit Length (3)");
+        validateInput("TRN-12345", trainIdRegex, "Invalid Digit Length (5)");
+        validateInput("TRAIN12", trainIdRegex, "Invalid Prefix");
+        validateInput("", trainIdRegex, "Empty Input");
 
-        // 3. Empty Train
-        List<GoodsBogie> emptyTrain = new ArrayList<>();
+        // --- Test Cases for Cargo Code ---
+        System.out.println("\n--- Cargo Code Validation ---");
+        validateInput("PET-AB", cargoCodeRegex, "Valid Cargo Code");
+        validateInput("PET-ab", cargoCodeRegex, "Invalid Case (Lowercase)");
+        validateInput("PET-12", cargoCodeRegex, "Invalid Suffix (Digits)");
+        validateInput("PET-ABC", cargoCodeRegex, "Invalid Suffix Length");
+        validateInput("AB-PET", cargoCodeRegex, "Invalid Format");
 
-        // Execution of Validations
-        runSafetyCheck(validTrain, "Standard Valid Train");
-        runSafetyCheck(invalidTrain, "Train with Rule Violation");
-        runSafetyCheck(emptyTrain, "Empty Bogie List");
-
-        System.out.println("\nUC12 safety validation completed...");
+        System.out.println("\nUC11 regex validation completed...");
     }
 
-    private static void runSafetyCheck(List<GoodsBogie> train, String scenario) {
-        System.out.println("Scenario: " + scenario);
+    /**
+     * Helper method to perform validation and print results
+     */
+    private static void validateInput(String input, String regex, String description) {
+        // String.matches() performs an exact pattern check
+        boolean isValid = input.matches(regex);
+        String status = isValid ? "[PASS]" : "[FAIL]";
 
-        boolean isSafe = train.stream().allMatch(bogie ->
-                !bogie.type.equals("Cylindrical") || bogie.cargo.equals("Petroleum")
-        );
-
-        System.out.println("Bogie List: " + train);
-        System.out.println("Safety Validation Result: " + (isSafe ? "SAFE [PASS]" : "UNSAFE [FAIL]"));
-        System.out.println("----------------------------------------------");
+        System.out.printf("%-6s | Input: '%-10s' | Case: %-25s%n",
+                status, input, description);
     }
 }
