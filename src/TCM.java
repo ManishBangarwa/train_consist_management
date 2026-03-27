@@ -1,47 +1,67 @@
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TCM {
+
+    static class Bogie {
+        String id;
+        int capacity;
+
+        Bogie(String id, int capacity) {
+            this.id = id;
+            this.capacity = capacity;
+        }
+    }
 
     public static void main(String[] args) {
 
         // Display banner
         System.out.println("==============================================");
-        System.out.println(" UC11 - Regex Validation (ID & Cargo) ");
+        System.out.println(" UC13 - Performance: Loop vs Stream ");
         System.out.println("==============================================\n");
 
-        // Define Regex Patterns
-        // ^ and $ ensure we match the entire string from start to end
-        String trainIdRegex = "^TRN-\\d{4}$";
-        String cargoCodeRegex = "^PET-[A-Z]{2}$";
+        // 1. Prepare a large dataset (10,000 bogies)
+        List<Bogie> largeDataset = new ArrayList<>();
+        for (int i = 1; i <= 10000; i++) {
+            // Alternating capacities between 30 and 80
+            largeDataset.add(new Bogie("B" + i, (i % 2 == 0) ? 80 : 30));
+        }
 
-        // --- Test Cases for Train ID ---
-        System.out.println("--- Train ID Validation ---");
-        validateInput("TRN-1234", trainIdRegex, "Valid Train ID");
-        validateInput("TRN-123", trainIdRegex, "Invalid Digit Length (3)");
-        validateInput("TRN-12345", trainIdRegex, "Invalid Digit Length (5)");
-        validateInput("TRAIN12", trainIdRegex, "Invalid Prefix");
-        validateInput("", trainIdRegex, "Empty Input");
+        System.out.println("Dataset Size: " + largeDataset.size() + " bogies\n");
 
-        // --- Test Cases for Cargo Code ---
-        System.out.println("\n--- Cargo Code Validation ---");
-        validateInput("PET-AB", cargoCodeRegex, "Valid Cargo Code");
-        validateInput("PET-ab", cargoCodeRegex, "Invalid Case (Lowercase)");
-        validateInput("PET-12", cargoCodeRegex, "Invalid Suffix (Digits)");
-        validateInput("PET-ABC", cargoCodeRegex, "Invalid Suffix Length");
-        validateInput("AB-PET", cargoCodeRegex, "Invalid Format");
+        // ---- APPROACH 1: TRADITIONAL LOOP ----
+        long startLoop = System.nanoTime();
+        List<Bogie> loopFiltered = new ArrayList<>();
+        for (Bogie b : largeDataset) {
+            if (b.capacity > 60) {
+                loopFiltered.add(b);
+            }
+        }
+        long endLoop = System.nanoTime();
+        long loopDuration = endLoop - startLoop;
 
-        System.out.println("\nUC11 regex validation completed...");
-    }
+        // ---- APPROACH 2: JAVA STREAMS ----
+        long startStream = System.nanoTime();
+        List<Bogie> streamFiltered = largeDataset.stream()
+                .filter(b -> b.capacity > 60)
+                .collect(Collectors.toList());
+        long endStream = System.nanoTime();
+        long streamDuration = endStream - startStream;
 
-    /**
-     * Helper method to perform validation and print results
-     */
-    private static void validateInput(String input, String regex, String description) {
-        // String.matches() performs an exact pattern check
-        boolean isValid = input.matches(regex);
-        String status = isValid ? "[PASS]" : "[FAIL]";
+        // Display Results
+        System.out.println("--- Filtering Results ---");
+        System.out.println("Loop Filtered Count   : " + loopFiltered.size());
+        System.out.println("Stream Filtered Count : " + streamFiltered.size());
+        System.out.println("Results Match?        : " + (loopFiltered.size() == streamFiltered.size()));
 
-        System.out.printf("%-6s | Input: '%-10s' | Case: %-25s%n",
-                status, input, description);
+        System.out.println("\n--- Execution Time (Nanoseconds) ---");
+        System.out.println("Loop Execution Time   : " + loopDuration + " ns");
+        System.out.println("Stream Execution Time : " + streamDuration + " ns");
+
+        // Performance Insight
+        String faster = (loopDuration < streamDuration) ? "Loop" : "Stream";
+        System.out.println("\nPerformance Note: In this run, " + faster + " was faster.");
+        System.out.println("UC13 benchmarking completed...");
     }
 }
