@@ -1,39 +1,20 @@
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * ============================================================
- * MAIN CLASS - TCM
- * ============================================================
- * * Use Case 10: Aggregate Bogie Capacity (Stream)
- * * Description:
- * This class calculates the total seating capacity of a train
- * by aggregating individual bogie capacities using the
- * Stream API's map and reduce operations.
- * * At this stage, the application:
- * - Extracts capacity values using map()
- * - Performs numeric aggregation using reduce()
- * - Handles single, multiple, and empty bogie lists
- * - Maintains original collection integrity
- * * This maps terminal operations using Stream API.
- * * @author Developer
- * @version 10.0
- */
 public class TCM {
 
-    // Inner Bogie class
-    static class Bogie {
-        String name;
-        int capacity;
+    // Inner class to represent a Goods Bogie
+    static class GoodsBogie {
+        String type;
+        String cargo;
 
-        Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
+        GoodsBogie(String type, String cargo) {
+            this.type = type;
+            this.cargo = cargo;
         }
 
         @Override
         public String toString() {
-            return name + " (Capacity: " + capacity + ")";
+            return String.format("[%s | Cargo: %s]", type, cargo);
         }
     }
 
@@ -41,44 +22,41 @@ public class TCM {
 
         // Display banner
         System.out.println("==============================================");
-        System.out.println(" UC10 - Aggregate Bogie Capacity (Stream) ");
+        System.out.println(" UC12 - Stream Safety Validation (allMatch) ");
         System.out.println("==============================================\n");
 
-        // Initialize the bogie list
-        List<Bogie> bogieList = new ArrayList<>();
-        bogieList.add(new Bogie("Sleeper", 72));
-        bogieList.add(new Bogie("AC Chair", 56));
-        bogieList.add(new Bogie("First Class", 24));
-        bogieList.add(new Bogie("General", 90));
+        // 1. Valid Train Formation
+        List<GoodsBogie> validTrain = new ArrayList<>();
+        validTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
+        validTrain.add(new GoodsBogie("Open", "Coal"));
+        validTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
 
-        // Display the list of bogies
-        System.out.println("Current Train Consist:");
-        bogieList.forEach(System.out::println);
+        // 2. Invalid Train Formation (Violation: Cylindrical carrying Coal)
+        List<GoodsBogie> invalidTrain = new ArrayList<>();
+        invalidTrain.add(new GoodsBogie("Cylindrical", "Petroleum"));
+        invalidTrain.add(new GoodsBogie("Cylindrical", "Coal")); // Violation
+        invalidTrain.add(new GoodsBogie("Box", "Grain"));
 
-        // ---- STREAM AGGREGATION ----
-        // 1. stream() - Starts the process
-        // 2. map(b -> b.capacity) - Extracts the integer capacity from each Bogie object
-        // 3. reduce(0, Integer::sum) - Starts at 0 and adds every capacity to the running total
-        int totalCapacity = bogieList.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
+        // 3. Empty Train
+        List<GoodsBogie> emptyTrain = new ArrayList<>();
 
-        // Display the aggregated result
-        System.out.println("\n----------------------------------------------");
-        System.out.println("Total Seating Capacity : " + totalCapacity);
+        // Execution of Validations
+        runSafetyCheck(validTrain, "Standard Valid Train");
+        runSafetyCheck(invalidTrain, "Train with Rule Violation");
+        runSafetyCheck(emptyTrain, "Empty Bogie List");
+
+        System.out.println("\nUC12 safety validation completed...");
+    }
+
+    private static void runSafetyCheck(List<GoodsBogie> train, String scenario) {
+        System.out.println("Scenario: " + scenario);
+
+        boolean isSafe = train.stream().allMatch(bogie ->
+                !bogie.type.equals("Cylindrical") || bogie.cargo.equals("Petroleum")
+        );
+
+        System.out.println("Bogie List: " + train);
+        System.out.println("Safety Validation Result: " + (isSafe ? "SAFE [PASS]" : "UNSAFE [FAIL]"));
         System.out.println("----------------------------------------------");
-
-        // Integrity Check
-        System.out.println("\nVerification:");
-        System.out.println("Bogie count remains: " + bogieList.size());
-
-        // Handling Empty Case (Requirement check)
-        List<Bogie> emptyList = new ArrayList<>();
-        int emptyTotal = emptyList.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
-        System.out.println("Empty list aggregation result: " + emptyTotal);
-
-        System.out.println("\nUC10 aggregation operations completed...");
     }
 }
