@@ -1,16 +1,28 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+
+class InvalidCapacityException extends Exception {
+    public InvalidCapacityException(String message) {
+        super(message);
+    }
+}
 
 public class TCM {
 
+    // Inner Bogie class with validation logic
     static class Bogie {
-        String id;
+        String type;
         int capacity;
 
-        Bogie(String id, int capacity) {
-            this.id = id;
+        Bogie(String type, int capacity) throws InvalidCapacityException {
+            if (capacity <= 0) {
+                throw new InvalidCapacityException("Capacity must be greater than zero");
+            }
+            this.type = type;
             this.capacity = capacity;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Bogie[Type: %s, Capacity: %d]", type, capacity);
         }
     }
 
@@ -18,50 +30,36 @@ public class TCM {
 
         // Display banner
         System.out.println("==============================================");
-        System.out.println(" UC13 - Performance: Loop vs Stream ");
+        System.out.println(" UC14 - Custom Exception Validation ");
         System.out.println("==============================================\n");
 
-        // 1. Prepare a large dataset (10,000 bogies)
-        List<Bogie> largeDataset = new ArrayList<>();
-        for (int i = 1; i <= 10000; i++) {
-            // Alternating capacities between 30 and 80
-            largeDataset.add(new Bogie("B" + i, (i % 2 == 0) ? 80 : 30));
+        // --- Test Case 1: Valid Capacity ---
+        System.out.println("Scenario: Creating bogie with valid capacity (72)");
+        try {
+            Bogie b1 = new Bogie("Sleeper", 72);
+            System.out.println("Success: " + b1);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Error: " + e.getMessage());
         }
 
-        System.out.println("Dataset Size: " + largeDataset.size() + " bogies\n");
-
-        // ---- APPROACH 1: TRADITIONAL LOOP ----
-        long startLoop = System.nanoTime();
-        List<Bogie> loopFiltered = new ArrayList<>();
-        for (Bogie b : largeDataset) {
-            if (b.capacity > 60) {
-                loopFiltered.add(b);
-            }
+        // --- Test Case 2: Zero Capacity ---
+        System.out.println("\nScenario: Creating bogie with zero capacity (0)");
+        try {
+            Bogie b2 = new Bogie("General", 0);
+            System.out.println("Success: " + b2);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Caught Expected Exception: " + e.getMessage());
         }
-        long endLoop = System.nanoTime();
-        long loopDuration = endLoop - startLoop;
 
-        // ---- APPROACH 2: JAVA STREAMS ----
-        long startStream = System.nanoTime();
-        List<Bogie> streamFiltered = largeDataset.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
-        long endStream = System.nanoTime();
-        long streamDuration = endStream - startStream;
+        // --- Test Case 3: Negative Capacity ---
+        System.out.println("\nScenario: Creating bogie with negative capacity (-10)");
+        try {
+            Bogie b3 = new Bogie("AC Chair", -10);
+            System.out.println("Success: " + b3);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Caught Expected Exception: " + e.getMessage());
+        }
 
-        // Display Results
-        System.out.println("--- Filtering Results ---");
-        System.out.println("Loop Filtered Count   : " + loopFiltered.size());
-        System.out.println("Stream Filtered Count : " + streamFiltered.size());
-        System.out.println("Results Match?        : " + (loopFiltered.size() == streamFiltered.size()));
-
-        System.out.println("\n--- Execution Time (Nanoseconds) ---");
-        System.out.println("Loop Execution Time   : " + loopDuration + " ns");
-        System.out.println("Stream Execution Time : " + streamDuration + " ns");
-
-        // Performance Insight
-        String faster = (loopDuration < streamDuration) ? "Loop" : "Stream";
-        System.out.println("\nPerformance Note: In this run, " + faster + " was faster.");
-        System.out.println("UC13 benchmarking completed...");
+        System.out.println("\nUC14 exception validation completed...");
     }
 }
