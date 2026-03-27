@@ -1,28 +1,27 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * ============================================================
  * MAIN CLASS - TCM
  * ============================================================
- * * Use Case 9: Group Bogies by Type (Stream)
+ * * Use Case 10: Aggregate Bogie Capacity (Stream)
  * * Description:
- * This class groups passenger bogies based on their type
- * using the Collectors.groupingBy() operation of Stream API.
+ * This class calculates the total seating capacity of a train
+ * by aggregating individual bogie capacities using the
+ * Stream API's map and reduce operations.
  * * At this stage, the application:
- * - Creates multiple bogie objects (including identical types)
- * - Groups bogies using Stream API
- * - Validates the Map structure (Key: Type, Value: List of Bogies)
- * - Ensures the original collection is not modified
- * * This maps categorization logic using Stream API.
+ * - Extracts capacity values using map()
+ * - Performs numeric aggregation using reduce()
+ * - Handles single, multiple, and empty bogie lists
+ * - Maintains original collection integrity
+ * * This maps terminal operations using Stream API.
  * * @author Developer
- * @version 9.0
+ * @version 10.0
  */
 public class TCM {
 
-    // Inner Bogie class (Consistent with previous Use Cases)
+    // Inner Bogie class
     static class Bogie {
         String name;
         int capacity;
@@ -34,7 +33,7 @@ public class TCM {
 
         @Override
         public String toString() {
-            return name + " -> " + capacity;
+            return name + " (Capacity: " + capacity + ")";
         }
     }
 
@@ -42,39 +41,44 @@ public class TCM {
 
         // Display banner
         System.out.println("==============================================");
-        System.out.println(" UC9 - Group Bogies by Type (Stream) ");
+        System.out.println(" UC10 - Aggregate Bogie Capacity (Stream) ");
         System.out.println("==============================================\n");
 
-        // Initialize the bogie list with some duplicate types for grouping
+        // Initialize the bogie list
         List<Bogie> bogieList = new ArrayList<>();
         bogieList.add(new Bogie("Sleeper", 72));
         bogieList.add(new Bogie("AC Chair", 56));
-        bogieList.add(new Bogie("Sleeper", 70)); // Second sleeper bogie
         bogieList.add(new Bogie("First Class", 24));
         bogieList.add(new Bogie("General", 90));
 
-        // Display the original list
-        System.out.println("Original Bogie List:");
+        // Display the list of bogies
+        System.out.println("Current Train Consist:");
         bogieList.forEach(System.out::println);
 
-        // ---- STREAM GROUPING ----
-        // 1. stream() converts the list
-        // 2. collect() uses groupingBy to organize bogies by their 'name'
-        // Result is a Map<String, List<Bogie>>
-        Map<String, List<Bogie>> groupedBogies = bogieList.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        // ---- STREAM AGGREGATION ----
+        // 1. stream() - Starts the process
+        // 2. map(b -> b.capacity) - Extracts the integer capacity from each Bogie object
+        // 3. reduce(0, Integer::sum) - Starts at 0 and adds every capacity to the running total
+        int totalCapacity = bogieList.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
-        // Display grouped results matching the expected output format
-        System.out.println("\nGrouped Bogies (By Type):");
-        groupedBogies.forEach((type, list) -> {
-            System.out.println(type + " -> " + list);
-        });
+        // Display the aggregated result
+        System.out.println("\n----------------------------------------------");
+        System.out.println("Total Seating Capacity : " + totalCapacity);
+        System.out.println("----------------------------------------------");
 
-        // Integrity Check (Satisfying test case requirements)
-        System.out.println("\nNote:");
-        System.out.println("Original list size remains: " + bogieList.size());
-        System.out.println("The operation successfully separated " + groupedBogies.size() + " distinct categories.");
+        // Integrity Check
+        System.out.println("\nVerification:");
+        System.out.println("Bogie count remains: " + bogieList.size());
 
-        System.out.println("\nUC9 grouping operations completed...");
+        // Handling Empty Case (Requirement check)
+        List<Bogie> emptyList = new ArrayList<>();
+        int emptyTotal = emptyList.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+        System.out.println("Empty list aggregation result: " + emptyTotal);
+
+        System.out.println("\nUC10 aggregation operations completed...");
     }
 }
